@@ -3,7 +3,7 @@ public static class EntityManager
   static HashMap<EntityType, ArrayList<Entity>> m_entityLists = new HashMap();
   public static boolean anyAlive;
   
-  public static float mutationRate = 0.01f;
+  public static final float mutationRate = 0.05f;
   
   EntityManager()
   {
@@ -113,9 +113,50 @@ public static class EntityManager
   {
     for(EntityType keys : m_entityLists.keySet()) //for each list
     {
+      if(keys == EntityType.PLANT)
+      {
+        continue;
+      }
       for(Entity e : m_entityLists.get(keys)) //for each animal in each list
       {
+        e.m_dt = dt;
         e.tickLife(dt);
+      }
+    }
+  }
+  
+  //////////////////////////////////////////////////////////////////////
+  public static void checkCollisions()
+  {
+    for(EntityType keyOne : m_entityLists.keySet()) //for each list
+    {
+      for(Entity entityOne : m_entityLists.get(keyOne)) //for each animal in each list
+      {
+        if (entityOne.isDead())
+        {
+          continue;
+        }
+        for(EntityType keyTwo : m_entityLists.keySet()) //check against each list that is not their own
+        {
+          if(keyOne == keyTwo)
+          {
+            continue;
+          }
+          for(Entity entityTwo : m_entityLists.get(keyTwo)) //check against each entity in each list
+          {
+            if (entityTwo.isDead())
+            {
+              continue;
+            }
+            if (CollisionDetection.collisionTest(entityOne, entityTwo))
+            {
+//              println("collision detected");
+              //pass entities to each other to handle collision
+              entityOne.collidedWith(entityTwo);
+              entityTwo.collidedWith(entityOne);
+            }
+          }
+        }
       }
     }
   }
@@ -161,13 +202,16 @@ public static class EntityManager
       switch (keys)
       {
       case HERBIVORE:
+      case CARNIVORE:
         int x = 0;
+//        println(x);
         for(Entity e : m_entityLists.get(keys)) //for each animal in each list
         {
+//          println(x);
           int n = (int)(e.m_fitness * 100);
           for (int i = 0; i < n; i ++)
           {
-            //println(i + x);
+//            println("i: " + i +"x: " + x + "n: " + n);
             matingPool.put(i + x, e);
           }
           x += n;
@@ -192,8 +236,12 @@ public static class EntityManager
             //println("p2 not found at: " + b);
             p2 = (Creature)matingPool.get(++b);
           }
-  */        
           
+          println(matingPool);
+          println(e.getType());
+          println("\tParent at: " + a + ": " + p1);
+          println("\tParent at: " + b + ": " + p2);
+  */
           ((Creature)e).plantSeekMult = (int)(Math.random() * 10)%2 == 0 ? p1.plantSeekMult : p2.plantSeekMult;
           ((Creature)e).plantFleeMult = (int)(Math.random() * 10)%2 == 0 ? p1.plantFleeMult : p2.plantFleeMult;
           ((Creature)e).plantAlignMult = (int)(Math.random() * 10)%2 == 0 ? p1.plantAlignMult : p2.plantAlignMult;
@@ -206,22 +254,25 @@ public static class EntityManager
           ((Creature)e).herbCoheseMult = (int)(Math.random() * 10)%2 == 0 ? p1.herbCoheseMult : p2.herbCoheseMult;
           
           //mutation check
-          if (Math.random() <= mutationRate) ((Creature)e).plantSeekMult = (float)Math.random() * 10;
-          if (Math.random() <= mutationRate) ((Creature)e).plantFleeMult = (float)Math.random() * 10;
-          if (Math.random() <= mutationRate) ((Creature)e).plantAlignMult = (float)Math.random() * 10;
-          if (Math.random() <= mutationRate) ((Creature)e).plantSeperateMult = (float)Math.random() * 10;
-          if (Math.random() <= mutationRate) ((Creature)e).plantCoheseMult = (float)Math.random() * 10;
-          if (Math.random() <= mutationRate) ((Creature)e).herbSeekMult = (float)Math.random() * 10;
-          if (Math.random() <= mutationRate) ((Creature)e).herbFleeMult = (float)Math.random() * 10;
-          if (Math.random() <= mutationRate) ((Creature)e).herbAlignMult = (float)Math.random() * 10;
-          if (Math.random() <= mutationRate) ((Creature)e).herbSeperateMult = (float)Math.random() * 10;
-          if (Math.random() <= mutationRate) ((Creature)e).herbCoheseMult = (float)Math.random() * 10;
+          if (Math.random() <= mutationRate) ((Creature)e).plantSeekMult = (float)(Math.random() * 2 - 1);
+          if (Math.random() <= mutationRate) ((Creature)e).plantFleeMult = (float)(Math.random() * 2 - 1);
+          if (Math.random() <= mutationRate) ((Creature)e).plantAlignMult = (float)(Math.random() * 2 - 1);
+          if (Math.random() <= mutationRate) ((Creature)e).plantSeperateMult = (float)(Math.random() * 2 - 1);
+          if (Math.random() <= mutationRate) ((Creature)e).plantCoheseMult = (float)(Math.random() * 2 - 1);
+          if (Math.random() <= mutationRate) ((Creature)e).herbSeekMult = (float)(Math.random() * 2 - 1);
+          if (Math.random() <= mutationRate) ((Creature)e).herbFleeMult = (float)(Math.random() * 2 - 1);
+          if (Math.random() <= mutationRate) ((Creature)e).herbAlignMult = (float)(Math.random() * 2 - 1);
+          if (Math.random() <= mutationRate) ((Creature)e).herbSeperateMult = (float)(Math.random() * 2 - 1);
+          if (Math.random() <= mutationRate) ((Creature)e).herbCoheseMult = (float)(Math.random() * 2 - 1);
           
           e.reset();
         }
         break;
       case PLANT:
-        
+        for(Entity e : m_entityLists.get(keys))
+        {
+          e.reset();
+        }
         break;
       default:
       }//end switch

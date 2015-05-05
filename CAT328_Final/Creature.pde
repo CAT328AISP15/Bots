@@ -2,19 +2,27 @@ public class Creature extends Entity
 {
   public float plantSeekMult, plantFleeMult, plantAlignMult, plantSeperateMult, plantCoheseMult; 
   public float herbSeekMult, herbFleeMult, herbAlignMult, herbSeperateMult, herbCoheseMult;
+  public float carnSeekMult, carnFleeMult, carnAlignMult, carnSeperateMult, carnCoheseMult;
   
   PVector m_startPos, m_startRot, m_startVel;
   int m_startLife;
   
+  boolean m_isEating = false;
+  public float m_eatTime = 500.0f;
+  float m_curEatTime = 0.0f;
+  
   Creature()
   {
     m_maxLookDistance = 50;
+    m_fillColor = 0xffffffff;
+    m_width = 20;
   }
   
   public void init(PVector startPos, 
                    PVector startRot, 
                    PVector startVel,
                    int startLife,
+                   float maxVel,
                    float[] mults)
   {
     plantSeekMult = mults[0];
@@ -27,11 +35,18 @@ public class Creature extends Entity
     herbAlignMult = mults[7];
     herbSeperateMult = mults[8];
     herbCoheseMult = mults[9];
+    carnSeekMult = mults[10];
+    carnFleeMult = mults[11];
+    carnAlignMult = mults[12];
+    carnSeperateMult = mults[13];
+    carnCoheseMult = mults[14];
     
     m_startPos = startPos;
     m_startRot = startRot; 
     m_startVel = startVel;
     m_startLife = startLife;
+    m_maxSpeed = maxVel;
+    m_colliderType = CollisionType.CIRCLE;
     
     reset();
   }
@@ -47,9 +62,18 @@ public class Creature extends Entity
   
   void update()
   {
-    //arrive(mouseX, mouseY);
-    updatePosition();
-    wrapAround();
+    m_isEating = m_curEatTime > 0.0f;
+    if (!m_isEating)
+    {
+      m_curEatTime = 0.0f;
+      updatePosition();
+      wrapAround();
+    }
+    else
+    {
+//      println("eating" + m_curEatTime + " dt: " + m_dt);
+      m_curEatTime -= m_dt;
+    }
   }
   
   void render()
@@ -64,8 +88,8 @@ public class Creature extends Entity
       translate(m_position.x, m_position.y);
       
       //draw
-      fill(0);
-      ellipse(0, 0, 10, 10);
+      fill(m_fillColor);
+      ellipse(0, 0, m_width, m_width);
       
       //pop matrix
       popMatrix();
@@ -106,4 +130,35 @@ public class Creature extends Entity
     applyForce(seekForce);
   }
   
+  public void collidedWith(Entity e)
+  {
+    if (getType() == EntityType.HERBIVORE) // this creature is an herbivore
+    {
+      if (e.getType() == EntityType.PLANT)
+      {
+//        println("Eating a plant");
+        m_curEatTime = m_eatTime;
+        m_life += 1000;
+      }
+      else if (e.getType() == EntityType.CARNIVORE)
+      {
+        m_life = 0;
+      }
+    }
+    else if (getType() == EntityType.CARNIVORE) // this creature is a carnivore
+    {
+      if (e.getType() == EntityType.HERBIVORE)
+      {
+        m_curEatTime = m_eatTime;
+        m_life += 1000;
+      }
+    }
+  }
 }
+
+
+
+
+
+
+

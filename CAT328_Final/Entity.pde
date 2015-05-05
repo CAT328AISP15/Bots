@@ -3,6 +3,8 @@ abstract class Entity
   public EntityType m_entityType;
   public CollisionType m_colliderType;
   
+  float m_dt = 0;
+  
   public PVector m_position;
   public PVector m_velocity = new PVector(0, 0);
   public PVector m_accel = new PVector(0, 0);
@@ -27,6 +29,8 @@ abstract class Entity
   protected int m_life;
   protected int m_lifespan = 0;
   public float m_fitness;
+  
+  public int m_fillColor;
   
   //protected boolean m_isFriendly;
   
@@ -76,9 +80,11 @@ abstract class Entity
   {
     if (m_life >= dt)
       m_lifespan += dt;
-    else
-      m_lifespan += m_life;
     m_life -= dt;
+  }
+  public EntityType getType()
+  {
+    return m_entityType;
   }
   
   
@@ -89,11 +95,13 @@ abstract class Entity
                             PVector startRot, 
                             PVector startVel,
                             int startLife,
+                            float maxVel,
                             float[] mults);
   public abstract void reset();
   public abstract void update();
   public abstract void render();
   public abstract void lookAround(ArrayList<Entity> entityList, EntityType eType);
+  public abstract void collidedWith(Entity e);
   
   protected float calcRotAngle()
   {
@@ -112,6 +120,7 @@ abstract class Entity
   void updatePosition()
   {
     m_velocity.add(m_accel);
+    m_velocity.setMag(m_maxSpeed);
     m_position.add(m_velocity);
     m_accel.mult(0);
   }
@@ -361,5 +370,11 @@ abstract class Entity
     PVector dest = PVector.add(new PVector(dx, sin(theta)), m_position);
     seek(dest);
     noiseOff.add(0.01, 0.01, 0);
+  }
+  
+  
+  public String toString()
+  {
+    return " Type: " + m_entityType + " currentLife: " + m_life + " lifespan: " + m_lifespan + '\n';
   }
 }
