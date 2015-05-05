@@ -3,6 +3,8 @@ ArrayList<Cell> path;
 
 Bee testBee;
 
+Flock flock;
+
 void setup()
 {
    size(1280, 768);
@@ -23,11 +25,19 @@ void setup()
    }
    
    testBee = new Bee(100, 100, 0);
+   flock = new Flock();
+   
+   for(int i = 0; i < 10; i++)
+   {
+     Bee b = new Bee(100, 100, 0);
+     flock.addBees(b); 
+   }
 }
 
 void draw()
 {
    grid.render();
-   testBee.update();
-   testBee.render();
+   //testBee.update();
+   //testBee.render();
+   flock.flowrun();
 }
