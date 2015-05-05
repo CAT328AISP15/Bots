@@ -12,6 +12,10 @@
   
   for balance, multipliers stay between -1 and 1
   for balance, carns move slightly faster than herbs, in case all herbs learn to evade carns at max speed, they can still eat.
+  
+  Left Click: add an herbivore to the pool
+  Right Click: add a carnivore to the pool
+  Any Other Mouse Click (middle mouse, etc): add a plant to the pool
 */
 
 public static final int PLANT_COUNT = 30;
@@ -111,10 +115,55 @@ void draw()
   }
 }
 
-void keyPressed()
-{
-}
-
 void mouseClicked()
 {
+  println("Mouse Clicked");
+  if (mouseButton == LEFT) // create a new herbivore
+  {
+    println("left Clicked");
+    Creature herb = new Creature();
+    float[] mults = new float[15];
+    for (int j = 0; j < mults.length; j++)
+    {
+      mults[j] = random(-1, 1);
+    }
+    herb.init(new PVector(mouseX, mouseY), //start position
+              new PVector(0, 0), //start rotation
+              new PVector(random(-1, 1), random(-1, 1)), //start velocity
+              2500, //start life
+              5.0f, //max velocity
+              mults); //start multipliers
+    herb.m_fillColor = HERB_COLOR;
+    herb.m_entityType = EntityType.HERBIVORE;
+    EntityManager.addEntity(EntityType.HERBIVORE, herb);
+  }
+  else if (mouseButton == RIGHT) // create carnivore
+  {
+    println("right Clicked");
+    Creature carn = new Creature();
+    float[] mults = new float[15];
+    for (int j = 0; j < mults.length; j++)
+    {
+      mults[j] = random(-1, 1);
+    }
+    carn.init(new PVector(mouseX, mouseY), //start position
+              new PVector(0, 0), //start rotation
+              new PVector(random(-1, 1), random(-1, 1)), //start velocity
+              2500, //start life
+              5.5f, //max velocity, slightly faster than herbs
+              mults); //start multipliers
+    carn.m_fillColor = CARN_COLOR;
+    carn.m_entityType = EntityType.CARNIVORE;
+    EntityManager.addEntity(EntityType.CARNIVORE, carn);
+  }
+  else //create plant
+  {
+    println("other Clicked");
+    Plant p = new Plant();
+    p.init(new PVector(mouseX, mouseY), null, null, 1, 0, null);
+    p.m_fillColor = PLANT_COLOR;
+    p.m_entityType = EntityType.PLANT;
+    EntityManager.addEntity(EntityType.PLANT, p);
+  }
 }
+
