@@ -114,6 +114,13 @@ public class Creature extends Entity
         seekForce.mult(herbSeekMult);
         break;
         
+      case CARNIVORE:
+        sepForce.mult(carnSeperateMult);
+        alignForce.mult(carnAlignMult);
+        coheseForce.mult(carnCoheseMult);
+        fleeForce.mult(carnFleeMult);
+        seekForce.mult(carnSeekMult);
+        break;
         
       default: //plant
         sepForce.mult(plantSeperateMult);
